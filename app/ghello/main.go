@@ -1,4 +1,4 @@
-package ghello
+package main
 
 import "fmt"
 
