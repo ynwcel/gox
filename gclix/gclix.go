@@ -8,7 +8,9 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func NewApp(appName, appVersion string) *cli.App {
+type App = cli.App
+
+func NewApp(appName, appVersion string) *App {
 	app := cli.NewApp()
 	app.Name = appName
 	app.Version = appVersion
