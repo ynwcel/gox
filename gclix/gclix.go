@@ -9,7 +9,7 @@ import (
 )
 
 type App = cli.App
-type Command = cli.Command
+type Cmd = cli.Command
 
 func NewApp(appName, appVersion string) *App {
 	app := cli.NewApp()
@@ -37,7 +37,7 @@ func NewApp(appName, appVersion string) *App {
 	return app
 }
 
-func NewCmd(cmdName string) *Command {
+func NewCmd(cmdName string) *Cmd {
 	return &cli.Command{
 		Name: cmdName,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
