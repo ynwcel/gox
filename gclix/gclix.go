@@ -1,4 +1,4 @@
-package pclix
+package gclix
 
 import (
 	"fmt"
