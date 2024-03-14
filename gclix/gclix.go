@@ -2,7 +2,6 @@ package gclix
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
@@ -21,14 +20,14 @@ func NewApp(appName, appVersion string) *App {
 		if err != nil {
 			var (
 				cmdName = cCtx.Command.Name
+				appName = cCtx.App.Name
 			)
-			color.Red("Error:%s", err.Error())
-			if appName != cmdName {
-				color.Green("please use `%s %s --help` get more", appName, cmdName)
+			color.Red("Error: %s", err.Error())
+			if cmdName != appName {
+				color.Green("Please use `%s %s --help` get more", appName, cmdName)
 			} else {
-				color.Green("please use `%s --help` get more", appName)
+				color.Green("Please use `%s --help` get more", appName)
 			}
-			os.Exit(3)
 		}
 	}
 	app.OnUsageError = func(cCtx *cli.Context, err error, isSubcommand bool) error {
@@ -39,7 +38,8 @@ func NewApp(appName, appVersion string) *App {
 
 func NewCmd(cmdName string) *Cmd {
 	return &cli.Command{
-		Name: cmdName,
+		Name:            cmdName,
+		HideHelpCommand: true,
 		OnUsageError: func(cCtx *cli.Context, err error, isSubcommand bool) error {
 			return err
 		},
