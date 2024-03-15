@@ -9,6 +9,7 @@ import (
 
 type App = cli.App
 type Cmd = cli.Command
+type Ctx = cli.Context
 
 func NewApp(appName, appVersion string) *App {
 	app := cli.NewApp()
