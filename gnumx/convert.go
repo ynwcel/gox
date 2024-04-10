@@ -22,13 +22,13 @@ const (
 	ConvertType62      = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
-type Convert struct {
+type convert struct {
 	runes []rune
 	nmaps map[rune]int
 }
 
-func NewConvert(convert_type string) *Convert {
-	r := &Convert{
+func NewConvert(convert_type string) *convert {
+	r := &convert{
 		runes: []rune(convert_type),
 	}
 	r.nmaps = make(map[rune]int, len(r.runes))
@@ -38,7 +38,7 @@ func NewConvert(convert_type string) *Convert {
 	return r
 }
 
-func (e *Convert) Encode(num int64) string {
+func (e *convert) Encode(num int64) string {
 	base := int64(len(e.runes))
 	r := make([]rune, 0, 64)
 
@@ -61,7 +61,7 @@ func (e *Convert) Encode(num int64) string {
 	return string(result)
 }
 
-func (e *Convert) Decode(val string) (int64, error) {
+func (e *convert) Decode(val string) (int64, error) {
 	var (
 		base         = int64(len(e.runes))
 		vrunes       = []rune(val)
