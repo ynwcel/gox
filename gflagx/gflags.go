@@ -1,4 +1,4 @@
-package gflags
+package gflagx
 
 import (
 	"bytes"
@@ -11,24 +11,24 @@ import (
 	"github.com/spf13/pflag"
 )
 
-type Cmdx struct {
+type Flagx struct {
 	*pflag.FlagSet
 	help_flag bool
 	version   string
 }
 
-func NewCmdx(appName ...string) *Cmdx {
+func NewFlagx(appName ...string) *Flagx {
 	app := filepath.Base(os.Args[0])
 	if len(appName) > 0 && len(appName[0]) > 0 {
 		app = appName[0]
 	}
-	cx := &Cmdx{}
-	cx.FlagSet = pflag.NewFlagSet(app, pflag.ContinueOnError)
-	cx.FlagSet.BoolVarP(&cx.help_flag, "help", "h", false, "show help messgae")
-	cx.FlagSet.Usage = func() {
+	fx := &Flagx{}
+	fx.FlagSet = pflag.NewFlagSet(app, pflag.ContinueOnError)
+	fx.FlagSet.BoolVarP(&fx.help_flag, "help", "h", false, "show help messgae")
+	fx.FlagSet.Usage = func() {
 		var (
 			out      = bytes.NewBuffer(nil)
-			usages   = strings.Split(strings.Trim(cx.FlagSet.FlagUsages(), "\n"), "\n")
+			usages   = strings.Split(strings.Trim(fx.FlagSet.FlagUsages(), "\n"), "\n")
 			help_idx = slices.IndexFunc(usages, func(line string) bool {
 				return strings.Contains(line, "--help")
 			})
@@ -43,24 +43,24 @@ func NewCmdx(appName ...string) *Cmdx {
 			fmt.Fprintln(out, strings.TrimRight(u, "\n"))
 		}
 		fmt.Fprintln(out, usages[help_idx])
-		if len(cx.version) > 0 {
+		if len(fx.version) > 0 {
 			fmt.Fprintln(out, "Version:")
-			fmt.Fprintf(out, "   %s", cx.version)
+			fmt.Fprintf(out, "   %s", fx.version)
 		}
 		fmt.Println(out.String())
 	}
-	return cx
+	return fx
 }
 
-func (gfx *Cmdx) SetVersion(version string) *Cmdx {
+func (gfx *Flagx) SetVersion(version string) *Flagx {
 	gfx.version = version
 	return gfx
 }
 
-func (gfx *Cmdx) GetVersion() string {
+func (gfx *Flagx) GetVersion() string {
 	return gfx.version
 }
 
-func (gfx *Cmdx) HasSetHelpFlag() bool {
+func (gfx *Flagx) HasSetHelpFlag() bool {
 	return gfx.help_flag
 }

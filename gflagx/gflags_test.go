@@ -1,4 +1,4 @@
-package gflags
+package gflagx
 
 import (
 	"testing"
@@ -12,12 +12,12 @@ func TestRun(t *testing.T) {
 		str_flag  string
 		bool_flag bool
 		strs_flag []string
-		cmd       = NewCmdx().SetVersion("0.0.1")
+		cmd       = NewFlagx().SetVersion("0.0.1")
 	)
 	cmd.IntVarP(&int_flag, "int", "i", 0, "set int_flag value")
 	cmd.StringVarP(&str_flag, "str", "s", "", "set str_flag value")
 	cmd.BoolVarP(&bool_flag, "bool", "b", false, "set bool_flag value")
-	cmd.StringSliceVar(&strs_flag, "strs", []string{}, "set str slices value")
+	cmd.StringSliceVarP(&strs_flag, "strs", "x", []string{}, "set str slices value")
 	if err := cmd.Parse(test_flags); err != nil {
 		t.Error(err)
 	}

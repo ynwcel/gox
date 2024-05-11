@@ -1,4 +1,4 @@
-module github.com/ynwcel/gox/gflags
+module github.com/ynwcel/gox/gflagx
 
 go 1.21.1
 
