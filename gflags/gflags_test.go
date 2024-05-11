@@ -12,7 +12,7 @@ func TestRun(t *testing.T) {
 		str_flag  string
 		bool_flag bool
 		strs_flag []string
-		cmd       = New().SetVersion("0.0.1")
+		cmd       = NewCmdx().SetVersion("0.0.1")
 	)
 	cmd.IntVarP(&int_flag, "int", "i", 0, "set int_flag value")
 	cmd.StringVarP(&str_flag, "str", "s", "", "set str_flag value")

@@ -11,18 +11,18 @@ import (
 	"github.com/spf13/pflag"
 )
 
-type gflagx struct {
+type Cmdx struct {
 	*pflag.FlagSet
 	help_flag bool
 	version   string
 }
 
-func New(appName ...string) *gflagx {
+func NewCmdx(appName ...string) *Cmdx {
 	app := filepath.Base(os.Args[0])
 	if len(appName) > 0 && len(appName[0]) > 0 {
 		app = appName[0]
 	}
-	cx := &gflagx{}
+	cx := &Cmdx{}
 	cx.FlagSet = pflag.NewFlagSet(app, pflag.ContinueOnError)
 	cx.FlagSet.BoolVarP(&cx.help_flag, "help", "h", false, "show help messgae")
 	cx.FlagSet.Usage = func() {
@@ -52,15 +52,15 @@ func New(appName ...string) *gflagx {
 	return cx
 }
 
-func (gfx *gflagx) SetVersion(version string) *gflagx {
+func (gfx *Cmdx) SetVersion(version string) *Cmdx {
 	gfx.version = version
 	return gfx
 }
 
-func (gfx *gflagx) GetVersion(version string) string {
+func (gfx *Cmdx) GetVersion() string {
 	return gfx.version
 }
 
-func (gfx *gflagx) HasSetHelpFlag() bool {
+func (gfx *Cmdx) HasSetHelpFlag() bool {
 	return gfx.help_flag
 }
