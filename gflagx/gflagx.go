@@ -35,7 +35,7 @@ func NewFlagx(appName ...string) *Flagx {
 		)
 		fmt.Fprintln(out, "Usage:")
 		fmt.Fprintf(out, "   %s [options]\n", app)
-		fmt.Fprintln(out, "Flags:")
+		fmt.Fprintln(out, "Options:")
 		for idx, u := range usages {
 			if idx == help_idx {
 				continue
