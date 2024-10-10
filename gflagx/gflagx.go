@@ -33,19 +33,16 @@ func NewFlagx(appName ...string) *Flagx {
 				return strings.Contains(line, "--help")
 			})
 		)
+		usages = append(usages[:help_idx], append(usages[help_idx+1:], usages[help_idx])...)
 		fmt.Fprintln(out, "Usage:")
-		fmt.Fprintf(out, "   %s [options]\n", app)
+		fmt.Fprintf(out, "  %s [options]\n", app)
 		fmt.Fprintln(out, "Options:")
-		for idx, u := range usages {
-			if idx == help_idx {
-				continue
-			}
+		for _, u := range usages {
 			fmt.Fprintln(out, strings.TrimRight(u, "\n"))
 		}
-		fmt.Fprintln(out, usages[help_idx])
 		if len(fx.version) > 0 {
 			fmt.Fprintln(out, "Version:")
-			fmt.Fprintf(out, "   %s", fx.version)
+			fmt.Fprintf(out, "  %s", fx.version)
 		}
 		fmt.Println(out.String())
 	}
