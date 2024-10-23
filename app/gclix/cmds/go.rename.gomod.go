@@ -1,4 +1,4 @@
-package clix
+package cmds
 
 import (
 	"bytes"
@@ -9,21 +9,20 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gox/app/ghack/pkg"
 	"github.com/urfave/cli/v2"
-)
-
-var (
-	setgomod_cmd = &cli.Command{
-		Name:      "setgomod",
-		Usage:     "rename go mode name",
-		UsageText: fmt.Sprintf("%s setgomod <new mod name>", appName),
-		Action:    setgomod_action,
-	}
+	"github.com/ynwcel/gox/app/gclix/pkg"
 )
 
 func init() {
-	clixApp.Commands = append(clixApp.Commands, setgomod_cmd)
+	var (
+		go_rename_gomod = &cli.Command{
+			Name:      "go-rename-gomod",
+			Usage:     "rename go mode name",
+			UsageText: fmt.Sprintf("%s go-rename-gomod <new mod name>", appName),
+			Action:    setgomod_action,
+		}
+	)
+	clixApp.Commands = append(clixApp.Commands, go_rename_gomod)
 }
 
 func setgomod_action(ctx *cli.Context) error {

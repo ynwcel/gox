@@ -27,3 +27,11 @@ func GetGoModName() (string, error) {
 	}
 	return gomod_name, nil
 }
+
+func MustGetGoMod() string {
+	if v, err := GetGoModName(); err != nil {
+		panic(err)
+	} else {
+		return v
+	}
+}

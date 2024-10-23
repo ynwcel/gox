@@ -1,4 +1,4 @@
-package clix
+package cmds
 
 import (
 	"fmt"
@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	appName = "ghack"
+	appName = "gclix"
 	clixApp = &cli.App{
 		Name:            appName,
-		Usage:           "golang dev hack tools",
+		Usage:           "dev tools for golang",
 		UsageText:       fmt.Sprintf("%s <command> [options...]", appName),
 		HideHelpCommand: true,
 	}

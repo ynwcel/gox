@@ -1,4 +1,4 @@
-module github.com/gox/app/ghack
+module github.com/ynwcel/gox/app/gclix
 
 go 1.22.5
 
