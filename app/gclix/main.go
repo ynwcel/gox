@@ -5,11 +5,11 @@ import (
 )
 
 var (
-	appVersion = "0.0.1"
+	buildVersion = ""
 )
 
 func main() {
-	if err := cmds.RunWithVersion(appVersion); err != nil {
+	if err := cmds.RunWithVersion(buildVersion); err != nil {
 		panic(err)
 	}
 }
