@@ -16,32 +16,33 @@ import (
 
 func init() {
 	var (
-		output   string = fmt.Sprintf("%s.%s.%s", filepath.Base(pkg.MustGetGoMod()), runtime.GOOS, runtime.GOARCH)
-		go_build *cli.Command
-	)
-	if strings.ToLower(runtime.GOOS) == "windows" {
-		output = fmt.Sprintf("%s.exe", output)
-	}
+		go_build = &cli.Command{
+			Name:      "go-build",
+			Usage:     "go-build golang project",
+			UsageText: fmt.Sprintf("%s go-build [options...]", appName),
+			Action:    buildAction,
+		}
 
-	go_build = &cli.Command{
-		Name:      "go-build",
-		Usage:     "go-build golang project",
-		UsageText: fmt.Sprintf("%s go-build [options...]", appName),
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "output",
-				Aliases:     []string{"o"},
-				DefaultText: output,
-			},
-			&cli.StringFlag{
-				Name:        "dist",
-				Aliases:     []string{"d"},
-				Value:       fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
-				DefaultText: fmt.Sprintf("%s/%s [use `go tool dist list` list all]", runtime.GOOS, runtime.GOARCH),
-			},
-		},
-		Action: buildAction,
+		output_flags = &cli.StringFlag{
+			Name:    "output",
+			Aliases: []string{"o"},
+		}
+		dist_flags = &cli.StringFlag{
+			Name:    "dist",
+			Aliases: []string{"d"},
+		}
+	)
+	if mod_name, err := pkg.GetGoModName(); err == nil {
+		output_txt := fmt.Sprintf("%s.%s.%s", filepath.Base(mod_name), runtime.GOOS, runtime.GOARCH)
+		if strings.ToLower(runtime.GOOS) == "windows" {
+			output_txt = fmt.Sprintf("%s.exe", output_txt)
+		}
+		output_flags.DefaultText = output_txt
+
+		dist_flags.Value = fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
+		dist_flags.DefaultText = fmt.Sprintf("%s/%s [use `go tool dist list` list all]", runtime.GOOS, runtime.GOARCH)
 	}
+	go_build.Flags = append(go_build.Flags, output_flags, dist_flags)
 	clixApp.Commands = append(clixApp.Commands, go_build)
 }
 
