@@ -13,25 +13,21 @@ import (
 	"github.com/ynwcel/gox/app/gclix/pkg"
 )
 
-func init() {
-	var (
-		go_rename_gomod = &cli.Command{
-			Name:      "go-rename-gomod",
-			Usage:     "rename go mode name",
-			UsageText: fmt.Sprintf("%s go-rename-gomod <new mod name>", appName),
-			Action:    setgomod_action,
-		}
-	)
-	clixApp.Commands = append(clixApp.Commands, go_rename_gomod)
-}
+var (
+	goRenameGoMod = &cli.Command{
+		Name:      "go-rename-gomod",
+		Usage:     "rename go mode name",
+		UsageText: fmt.Sprintf("%s go-rename-gomod <new mod name>", appName),
+		Action:    goRenameGoModAction,
+	}
+)
 
-func setgomod_action(ctx *cli.Context) error {
+func goRenameGoModAction(ctx *cli.Context) error {
 	if ctx.NArg() < 1 {
 		cli.ShowSubcommandHelp(ctx)
 		return nil
 	}
 	var (
-		gomod_filename     = "./go.mod"
 		new_mod_name       = ctx.Args().First()
 		new_mod_name_bytes []byte
 		rewrite_files      = []string{}
@@ -45,7 +41,7 @@ func setgomod_action(ctx *cli.Context) error {
 		mod_regexp, err = regexp.Compile(`^[\w][\w\d\/\-]+$`)
 	)
 	if !mod_regexp.Match([]byte(new_mod_name)) {
-		return fmt.Errorf("new mod name<%s> is failed", new_mod_name)
+		return fmt.Errorf("new mod name `%s` is failed", new_mod_name)
 	}
 	new_mod_name_bytes = []byte(new_mod_name)
 
@@ -55,11 +51,11 @@ func setgomod_action(ctx *cli.Context) error {
 	old_mod_name_bytes = []byte(old_mod_name)
 
 	// 1.处理 go.mod
-	if f_content, err := os.ReadFile(gomod_filename); err != nil {
+	if f_content, err := os.ReadFile(GOMOD_FILE); err != nil {
 		return err
 	} else {
 		f_content = bytes.Replace(f_content, old_mod_name_bytes, new_mod_name_bytes, -1)
-		if err = os.WriteFile(gomod_filename, f_content, 0666); err != nil {
+		if err = os.WriteFile(GOMOD_FILE, f_content, 0666); err != nil {
 			return fmt.Errorf("save go.mod error:%W", err)
 		}
 	}

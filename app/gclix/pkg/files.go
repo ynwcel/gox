@@ -7,6 +7,13 @@ import (
 	"regexp"
 )
 
+func FileExists(filename string) bool {
+	if _, err := os.Stat(filename); err != nil && os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
 func ListFile(dirpath string, pattern string) ([]string, error) {
 	var (
 		dirfs       = os.DirFS(dirpath)

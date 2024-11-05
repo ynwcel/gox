@@ -5,6 +5,11 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v2"
+	"github.com/ynwcel/gox/app/gclix/pkg"
+)
+
+const (
+	GOMOD_FILE = "./go.mod"
 )
 
 var (
@@ -16,6 +21,12 @@ var (
 		HideHelpCommand: true,
 	}
 )
+
+func init() {
+	if pkg.FileExists(GOMOD_FILE) {
+		clixApp.Commands = append(clixApp.Commands, goBuildCmd, goRenameGoMod)
+	}
+}
 
 func RunWithVersion(version string) error {
 	clixApp.Version = version
