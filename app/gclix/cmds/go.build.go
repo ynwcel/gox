@@ -39,7 +39,7 @@ func init() {
 	if pkg.FileExists(GOMOD_FILE) {
 		mod_name := pkg.MustGetGoMod()
 		output_txt := fmt.Sprintf("%s.%s.%s", filepath.Base(mod_name), runtime.GOOS, runtime.GOARCH)
-		if strings.ToLower(runtime.GOOS) == "windows" {
+		if strings.ToLower(runtime.GOOS) == OS_WINDOWS {
 			output_txt = fmt.Sprintf("%s.exe", output_txt)
 		}
 		output_flags.DefaultText = output_txt
@@ -86,7 +86,7 @@ func goBuildAction(ctx *cli.Context) error {
 	if !install {
 		if len(output) <= 0 {
 			output = fmt.Sprintf("%s.%s.%s", mode_name, target_os, target_arch)
-			if target_os == "windows" {
+			if target_os == OS_WINDOWS {
 				output = fmt.Sprintf("%s.exe", output)
 			}
 		}

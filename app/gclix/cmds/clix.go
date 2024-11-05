@@ -9,6 +9,9 @@ import (
 )
 
 const (
+	OS_WINDOWS = "windows"
+	OS_LINUX   = "linux"
+	OS_DARWIN  = "darwin"
 	GOMOD_FILE = "./go.mod"
 )
 
@@ -24,8 +27,10 @@ var (
 
 func init() {
 	if pkg.FileExists(GOMOD_FILE) {
-		clixApp.Commands = append(clixApp.Commands, goBuildCmd, goRenameGoMod)
+		clixApp.Commands = append(clixApp.Commands, goBuildCmd, goRenameGoModCmd)
 	}
+
+	clixApp.Commands = append(clixApp.Commands, whereIsCmd)
 }
 
 func RunWithVersion(version string) error {

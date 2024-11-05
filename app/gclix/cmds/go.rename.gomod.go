@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	goRenameGoMod = &cli.Command{
+	goRenameGoModCmd = &cli.Command{
 		Name:      "go-rename-gomod",
 		Usage:     "rename go mode name",
 		UsageText: fmt.Sprintf("%s go-rename-gomod <new mod name>", appName),
