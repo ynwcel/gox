@@ -38,7 +38,7 @@ func goRenameGoModAction(ctx *cli.Context) error {
 			"mod",
 			"tidy",
 		}
-		mod_regexp, err = regexp.Compile(`^[\w][\w\d\/\-]+$`)
+		mod_regexp, err = regexp.Compile(`^[\w][\w\d\/\-\.]+[\w]$`)
 	)
 	if !mod_regexp.Match([]byte(new_mod_name)) {
 		return fmt.Errorf("new mod name `%s` is failed", new_mod_name)
