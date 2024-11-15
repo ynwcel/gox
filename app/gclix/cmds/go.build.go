@@ -23,6 +23,10 @@ var goBuildCmd = &cli.Command{
 
 func init() {
 	var (
+		generate_flag = &cli.BoolFlag{
+			Name:    "generate",
+			Aliases: []string{"g"},
+		}
 		install_flags = &cli.BoolFlag{
 			Name:    "install",
 			Aliases: []string{"i"},
@@ -47,16 +51,18 @@ func init() {
 
 	dist_flags.Value = fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
 	dist_flags.DefaultText = fmt.Sprintf("%s/%s [use `go tool dist list` list all]", runtime.GOOS, runtime.GOARCH)
-	goBuildCmd.Flags = append(goBuildCmd.Flags, install_flags, output_flags, dist_flags)
+	goBuildCmd.Flags = append(goBuildCmd.Flags, generate_flag, install_flags, output_flags, dist_flags)
 }
 
 func goBuildAction(ctx *cli.Context) error {
 	var (
-		gocmd *exec.Cmd
+		goGenCmd   *exec.Cmd
+		goBuildCmd *exec.Cmd
 
-		install = ctx.Bool("install")
-		dist    = ctx.String("dist")
-		output  = ctx.String("output")
+		generate = ctx.Bool("generate")
+		install  = ctx.Bool("install")
+		dist     = ctx.String("dist")
+		output   = ctx.String("output")
 
 		target_os   = runtime.GOOS
 		target_arch = runtime.GOARCH
@@ -65,24 +71,24 @@ func goBuildAction(ctx *cli.Context) error {
 	if install && len(output) > 0 {
 		return fmt.Errorf("`go install` command not support `--output` flag")
 	} else if install {
-		gocmd = exec.Command("go", "install")
+		goBuildCmd = exec.Command("go", "install")
 	} else {
-		gocmd = exec.Command("go", "build")
+		goBuildCmd = exec.Command("go", "build")
 	}
 
-	gocmd.Env = os.Environ()
+	goBuildCmd.Env = os.Environ()
 	if !strings.EqualFold(dist, fmt.Sprintf("%s/%s", target_os, target_arch)) {
 		dists := strings.SplitN(dist, "/", 2)
 		if len(dists) < 2 {
 			return errors.New("--dist must use `os/arch`")
 		}
 		target_os, target_arch = dists[0], dists[1]
-		gocmd.Env = append(gocmd.Env, "CGO_ENABLE=0")
-		gocmd.Env = append(gocmd.Env, fmt.Sprintf("GOOS=%s", target_os))
-		gocmd.Env = append(gocmd.Env, fmt.Sprintf("GOARCH=%s", target_arch))
+		goBuildCmd.Env = append(goBuildCmd.Env, "CGO_ENABLE=0")
+		goBuildCmd.Env = append(goBuildCmd.Env, fmt.Sprintf("GOOS=%s", target_os))
+		goBuildCmd.Env = append(goBuildCmd.Env, fmt.Sprintf("GOARCH=%s", target_arch))
 	}
 
-	gocmd.Args = append(gocmd.Args, "-ldflags", fmt.Sprintf("-X main.buildVersion=%s", build_version()))
+	goBuildCmd.Args = append(goBuildCmd.Args, "-ldflags", fmt.Sprintf("-X main.buildVersion=%s", build_version()))
 	if !install {
 		if len(output) <= 0 {
 			output = fmt.Sprintf("%s.%s.%s", mode_name, target_os, target_arch)
@@ -90,12 +96,22 @@ func goBuildAction(ctx *cli.Context) error {
 				output = fmt.Sprintf("%s.exe", output)
 			}
 		}
-		gocmd.Args = append(gocmd.Args, "-o", output)
+		goBuildCmd.Args = append(goBuildCmd.Args, "-o", output)
 	}
 
-	fmt.Println(gocmd)
+	if generate {
+		goGenCmd = exec.Command("go", "generate", "./...")
+		goGenCmd.Env = goBuildCmd.Env[:]
+		fmt.Println(goGenCmd)
 
-	if _, err := gocmd.CombinedOutput(); err != nil {
+		if _, err := goGenCmd.CombinedOutput(); err != nil {
+			return err
+		}
+	}
+
+	fmt.Println(goBuildCmd)
+
+	if _, err := goBuildCmd.CombinedOutput(); err != nil {
 		return err
 	}
 	return nil
