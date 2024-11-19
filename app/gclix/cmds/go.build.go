@@ -24,8 +24,10 @@ var goBuildCmd = &cli.Command{
 func init() {
 	var (
 		generate_flag = &cli.BoolFlag{
-			Name:    "generate",
-			Aliases: []string{"g"},
+			Name:        "generate",
+			Aliases:     []string{"g"},
+			DefaultText: "true",
+			Value:       true,
 		}
 		install_flags = &cli.BoolFlag{
 			Name:    "install",
