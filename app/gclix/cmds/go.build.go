@@ -43,16 +43,11 @@ func init() {
 		}
 	)
 	if pkg.FileExists(GOMOD_FILE) {
-		mod_name := pkg.MustGetGoMod()
-		output_txt := fmt.Sprintf("%s.%s.%s", filepath.Base(mod_name), runtime.GOOS, runtime.GOARCH)
-		if strings.ToLower(runtime.GOOS) == OS_WINDOWS {
-			output_txt = fmt.Sprintf("%s.exe", output_txt)
-		}
-		output_flags.DefaultText = output_txt
+		output_flags.DefaultText = build_name(runtime.GOOS, runtime.GOARCH)
 	}
 
-	dist_flags.Value = fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
 	dist_flags.DefaultText = fmt.Sprintf("%s/%s [use `go tool dist list` list all]", runtime.GOOS, runtime.GOARCH)
+	dist_flags.Value = fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
 	goBuildCmd.Flags = append(goBuildCmd.Flags, generate_flag, install_flags, output_flags, dist_flags)
 }
 
@@ -68,7 +63,6 @@ func goBuildAction(ctx *cli.Context) error {
 
 		target_os   = runtime.GOOS
 		target_arch = runtime.GOARCH
-		mode_name   = filepath.Base(pkg.MustGetGoMod())
 	)
 	if install && len(output) > 0 {
 		return fmt.Errorf("`go install` command not support `--output` flag")
@@ -93,10 +87,7 @@ func goBuildAction(ctx *cli.Context) error {
 	goBuildCmd.Args = append(goBuildCmd.Args, "-ldflags", fmt.Sprintf("-X main.buildVersion=%s", build_version()))
 	if !install {
 		if len(output) <= 0 {
-			output = fmt.Sprintf("%s.%s.%s", mode_name, target_os, target_arch)
-			if target_os == OS_WINDOWS {
-				output = fmt.Sprintf("%s.exe", output)
-			}
+			output = build_name(target_os, target_arch)
 		}
 		goBuildCmd.Args = append(goBuildCmd.Args, "-o", output)
 	}
@@ -119,15 +110,37 @@ func goBuildAction(ctx *cli.Context) error {
 	return nil
 }
 
-func build_version() string {
+func build_name(target_os, target_arch string) string {
+	mod_name := pkg.MustGetGoMod()
+	output_txt := fmt.Sprintf("%s.%s.%s.%s", filepath.Base(mod_name), target_os, target_arch, build_datetime())
+	if strings.ToLower(target_os) == OS_WINDOWS {
+		output_txt = fmt.Sprintf("%s.exe", output_txt)
+	}
+	return output_txt
+}
+
+func build_datetime() string {
+	return time.Now().Format("060102.1504")
+}
+
+func build_git_commitid() string {
 	var (
-		version      = time.Now().Format("060102.1504")
 		git_commitid string
 	)
-	if v, err := exec.Command("git", "describe", "rev-parse", "--short HEAD").Output(); err == nil {
-		git_commitid = string(v)
-	} else {
-		git_commitid = "no-commit-id"
+	if v, err := exec.Command("git", "rev-parse", "--short", "HEAD").Output(); err == nil {
+		git_commitid = strings.TrimSpace(string(v))
 	}
-	return fmt.Sprintf("%s.%s", version, git_commitid)
+	return git_commitid
+}
+
+func build_version() string {
+	var (
+		version      = build_datetime()
+		git_commitid = build_git_commitid()
+	)
+	if len(git_commitid) > 0 {
+		return fmt.Sprintf("%s.%s", version, git_commitid)
+	} else {
+		return version
+	}
 }
