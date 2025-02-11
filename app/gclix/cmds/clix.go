@@ -30,6 +30,7 @@ func init() {
 		clixApp.Commands = append(clixApp.Commands, goBuildCmd, goRenameGoModCmd)
 	}
 
+	clixApp.Commands = append(clixApp.Commands, gormGenCmd)
 	clixApp.Commands = append(clixApp.Commands, whereIsCmd)
 }
 
