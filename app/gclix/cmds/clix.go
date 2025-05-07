@@ -31,6 +31,7 @@ func init() {
 	}
 
 	clixApp.Commands = append(clixApp.Commands, gormGenCmd)
+	clixApp.Commands = append(clixApp.Commands, htmlTestCmd, htmlBuildCmd)
 	clixApp.Commands = append(clixApp.Commands, whereIsCmd)
 }
 

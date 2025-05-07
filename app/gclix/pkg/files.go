@@ -1,6 +1,8 @@
 package pkg
 
 import (
+	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -12,6 +14,40 @@ func FileExists(filename string) bool {
 		return false
 	}
 	return true
+}
+
+func IsDir(dirname string) bool {
+	if state, err := os.Stat(dirname); err == nil && state.IsDir() {
+		return true
+	}
+	return false
+}
+
+func PutContent(filename string, content string) (int, error) {
+	ofile, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		return 0, err
+	}
+	defer ofile.Close()
+	return fmt.Fprint(ofile, content)
+}
+
+func CopyFile(src, target string) (bool, error) {
+	ofile, err := os.Open(src)
+	if err != nil {
+		return false, err
+	}
+	defer ofile.Close()
+	wfile, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY, 0766)
+	if err != nil {
+		return false, err
+	}
+	defer wfile.Close()
+	if _, err := io.Copy(wfile, ofile); err == nil {
+		return true, nil
+	} else {
+		return false, err
+	}
 }
 
 func ListFile(dirpath string, pattern string) ([]string, error) {
