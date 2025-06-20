@@ -85,9 +85,27 @@ func goBuildAction(ctx *cli.Context) error {
 	}
 
 	goBuildCmd.Args = append(goBuildCmd.Args, "-ldflags", fmt.Sprintf("-X main.buildVersion=%s", build_version()))
+
 	if !install {
 		if len(output) <= 0 {
 			output = build_name(target_os, target_arch)
+		} else if strings.EqualFold(target_os, OS_WINDOWS) && !strings.Contains(output, ".exe") {
+			output = fmt.Sprintf("%s.exe", output)
+		}
+		var (
+			cur_datetime = time.Now()
+			cur_date     = cur_datetime.Format("060102")
+			cur_time     = cur_datetime.Format("1504")
+		)
+		if !strings.Contains(output, cur_date) {
+			var (
+				output_ext      = filepath.Ext(output)
+				output_basename = strings.TrimRight(output, output_ext)
+			)
+			output = fmt.Sprintf("%s.%s.%s", output_basename, cur_date, cur_time)
+			if len(output_ext) > 0 {
+				output = output + output_ext
+			}
 		}
 		goBuildCmd.Args = append(goBuildCmd.Args, "-o", output)
 	}
