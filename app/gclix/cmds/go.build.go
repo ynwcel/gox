@@ -96,17 +96,20 @@ func goBuildAction(ctx *cli.Context) error {
 			cur_datetime = time.Now()
 			cur_date     = cur_datetime.Format("060102")
 			cur_time     = cur_datetime.Format("1504")
+
+			output_ext      = filepath.Ext(output)
+			output_basename = strings.TrimRight(output, output_ext)
 		)
-		if !strings.Contains(output, cur_date) {
-			var (
-				output_ext      = filepath.Ext(output)
-				output_basename = strings.TrimRight(output, output_ext)
-			)
-			output = fmt.Sprintf("%s.%s.%s", output_basename, cur_date, cur_time)
-			if len(output_ext) > 0 {
-				output = output + output_ext
-			}
+		if !strings.Contains(output_basename, target_os) {
+			output_basename = fmt.Sprintf("%s.%s", output_basename, target_os)
 		}
+		if !strings.Contains(output_basename, target_arch) {
+			output_basename = fmt.Sprintf("%s.%s", output_basename, target_arch)
+		}
+		if !strings.Contains(output_basename, cur_date) {
+			output_basename = fmt.Sprintf("%s.%s.%s", output_basename, cur_date, cur_time)
+		}
+		output = output_basename + output_ext
 		goBuildCmd.Args = append(goBuildCmd.Args, "-o", output)
 	}
 
