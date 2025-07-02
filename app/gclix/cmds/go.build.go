@@ -63,6 +63,10 @@ func goBuildAction(ctx *cli.Context) error {
 
 		target_os   = runtime.GOOS
 		target_arch = runtime.GOARCH
+
+		cur_datetime = time.Now()
+		cur_date     = cur_datetime.Format("060102")
+		cur_time     = cur_datetime.Format("1504")
 	)
 	if install && len(output) > 0 {
 		return fmt.Errorf("`go install` command not support `--output` flag")
@@ -84,7 +88,7 @@ func goBuildAction(ctx *cli.Context) error {
 		goBuildCmd.Env = append(goBuildCmd.Env, fmt.Sprintf("GOARCH=%s", target_arch))
 	}
 
-	goBuildCmd.Args = append(goBuildCmd.Args, "-ldflags", fmt.Sprintf("-X main.buildVersion=%s", build_version()))
+	goBuildCmd.Args = append(goBuildCmd.Args, "-ldflags", fmt.Sprintf("-X main.buildVersion=%s.%s.%s", build_git_commitid(), cur_date, cur_time))
 
 	if !install {
 		if len(output) <= 0 {
@@ -93,10 +97,6 @@ func goBuildAction(ctx *cli.Context) error {
 			output = fmt.Sprintf("%s.exe", output)
 		}
 		var (
-			cur_datetime = time.Now()
-			cur_date     = cur_datetime.Format("060102")
-			cur_time     = cur_datetime.Format("1504")
-
 			output_ext      = filepath.Ext(output)
 			output_basename = strings.TrimRight(output, output_ext)
 		)
@@ -131,17 +131,12 @@ func goBuildAction(ctx *cli.Context) error {
 	return nil
 }
 
-func build_name(target_os, target_arch string) string {
-	mod_name := pkg.MustGetGoMod()
-	output_txt := fmt.Sprintf("%s.%s.%s.%s", filepath.Base(mod_name), target_os, target_arch, build_datetime())
-	if strings.ToLower(target_os) == OS_WINDOWS {
-		output_txt = fmt.Sprintf("%s.exe", output_txt)
+func build_name(os, arch string) string {
+	name := fmt.Sprintf("%s.%s.%s.%s", filepath.Base(pkg.MustGetGoMod()), os, arch, time.Now().Format("060102.1504"))
+	if strings.EqualFold(os, OS_WINDOWS) {
+		name = fmt.Sprintf("%s.exe", name)
 	}
-	return output_txt
-}
-
-func build_datetime() string {
-	return time.Now().Format("060102.1504")
+	return name
 }
 
 func build_git_commitid() string {
@@ -152,16 +147,4 @@ func build_git_commitid() string {
 		git_commitid = strings.TrimSpace(string(v))
 	}
 	return git_commitid
-}
-
-func build_version() string {
-	var (
-		version      = build_datetime()
-		git_commitid = build_git_commitid()
-	)
-	if len(git_commitid) > 0 {
-		return fmt.Sprintf("%s.%s", version, git_commitid)
-	} else {
-		return version
-	}
 }
