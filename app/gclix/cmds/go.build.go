@@ -96,20 +96,26 @@ func goBuildAction(ctx *cli.Context) error {
 		} else if strings.EqualFold(target_os, OS_WINDOWS) && !strings.Contains(output, ".exe") {
 			output = fmt.Sprintf("%s.exe", output)
 		}
+
 		var (
-			output_ext      = filepath.Ext(output)
-			output_basename = strings.TrimRight(output, output_ext)
+			output_has_exe  = strings.Contains(strings.ToLower(output), ".exe")
+			output_ext_name = filepath.Ext(output)
 		)
-		if !strings.Contains(output_basename, target_os) {
-			output_basename = fmt.Sprintf("%s.%s", output_basename, target_os)
+		if output_has_exe {
+			output = strings.TrimSuffix(output, output_ext_name)
 		}
-		if !strings.Contains(output_basename, target_arch) {
-			output_basename = fmt.Sprintf("%s.%s", output_basename, target_arch)
+		if !strings.Contains(output, target_os) {
+			output = fmt.Sprintf("%s.%s", output, target_os)
 		}
-		if !strings.Contains(output_basename, cur_date) {
-			output_basename = fmt.Sprintf("%s.%s.%s", output_basename, cur_date, cur_time)
+		if !strings.Contains(output, target_arch) {
+			output = fmt.Sprintf("%s.%s", output, target_arch)
 		}
-		output = output_basename + output_ext
+		if !strings.Contains(output, cur_date) {
+			output = fmt.Sprintf("%s.%s.%s", output, cur_date, cur_time)
+		}
+		if output_has_exe {
+			output = output + output_ext_name
+		}
 		goBuildCmd.Args = append(goBuildCmd.Args, "-o", output)
 	}
 
