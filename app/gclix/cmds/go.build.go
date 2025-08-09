@@ -14,12 +14,17 @@ import (
 	"github.com/ynwcel/gox/app/gclix/pkg"
 )
 
-var goBuildCmd = &cli.Command{
-	Name:      "go-build",
-	Usage:     "go-build golang project",
-	UsageText: fmt.Sprintf("%s go-build [options...]", appName),
-	Action:    goBuildAction,
-}
+var (
+	goBuildCmd = &cli.Command{
+		Name:      "go-build",
+		Usage:     "go-build golang project",
+		UsageText: fmt.Sprintf("%s go-build [options...]", appName),
+		Action:    goBuildAction,
+	}
+	cur_datetime = time.Now()
+	cur_date     = cur_datetime.Format("060102")
+	cur_time     = cur_datetime.Format("1504")
+)
 
 func init() {
 	var (
@@ -63,10 +68,6 @@ func goBuildAction(ctx *cli.Context) error {
 
 		target_os   = runtime.GOOS
 		target_arch = runtime.GOARCH
-
-		cur_datetime = time.Now()
-		cur_date     = cur_datetime.Format("060102")
-		cur_time     = cur_datetime.Format("1504")
 	)
 	if install && len(output) > 0 {
 		return fmt.Errorf("`go install` command not support `--output` flag")
@@ -88,7 +89,7 @@ func goBuildAction(ctx *cli.Context) error {
 		goBuildCmd.Env = append(goBuildCmd.Env, fmt.Sprintf("GOARCH=%s", target_arch))
 	}
 
-	goBuildCmd.Args = append(goBuildCmd.Args, "-ldflags", fmt.Sprintf("-X main.buildVersion=%s.%s.%s", build_git_commitid(), cur_date, cur_time))
+	goBuildCmd.Args = append(goBuildCmd.Args, "-ldflags", fmt.Sprintf("-X main.buildVersion=%s", build_version()))
 
 	if !install {
 		if len(output) <= 0 {
@@ -138,19 +139,19 @@ func goBuildAction(ctx *cli.Context) error {
 }
 
 func build_name(os, arch string) string {
-	name := fmt.Sprintf("%s.%s.%s.%s", filepath.Base(pkg.MustGetGoMod()), os, arch, time.Now().Format("060102.1504"))
+	name := fmt.Sprintf("%s.%s.%s.%s.%s", filepath.Base(pkg.MustGetGoMod()), os, arch, cur_date, cur_time)
 	if strings.EqualFold(os, OS_WINDOWS) {
 		name = fmt.Sprintf("%s.exe", name)
 	}
 	return name
 }
 
-func build_git_commitid() string {
+func build_version() string {
 	var (
-		git_commitid string
+		build_version = fmt.Sprintf("%s.%s", cur_date, cur_time)
 	)
 	if v, err := exec.Command("git", "rev-parse", "--short", "HEAD").Output(); err == nil {
-		git_commitid = strings.TrimSpace(string(v))
+		build_version = fmt.Sprintf("%s.%s", build_version, strings.TrimSpace(string(v)))
 	}
-	return git_commitid
+	return build_version
 }
