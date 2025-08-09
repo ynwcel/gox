@@ -148,10 +148,10 @@ func build_name(os, arch string) string {
 
 func build_version() string {
 	var (
-		build_version = fmt.Sprintf("%s.%s", cur_date, cur_time)
+		git_commit string
 	)
 	if v, err := exec.Command("git", "rev-parse", "--short", "HEAD").Output(); err == nil {
-		build_version = fmt.Sprintf("%s.%s", build_version, strings.TrimSpace(string(v)))
+		git_commit = strings.TrimSpace(string(v))
 	}
-	return build_version
+	return fmt.Sprintf("%s.%s@%s", cur_date, cur_time, git_commit)
 }
