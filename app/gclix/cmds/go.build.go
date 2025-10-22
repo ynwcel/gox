@@ -46,6 +46,9 @@ func init() {
 			Name:    "dist",
 			Aliases: []string{"d"},
 		}
+		wingui_flags = &cli.BoolFlag{
+			Name: "windowsgui",
+		}
 	)
 	if pkg.FileExists(GOMOD_FILE) {
 		output_flags.DefaultText = build_name(runtime.GOOS, runtime.GOARCH)
@@ -53,7 +56,7 @@ func init() {
 
 	dist_flags.DefaultText = fmt.Sprintf("%s/%s [use `go tool dist list` list all]", runtime.GOOS, runtime.GOARCH)
 	dist_flags.Value = fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
-	goBuildCmd.Flags = append(goBuildCmd.Flags, generate_flag, install_flags, output_flags, dist_flags)
+	goBuildCmd.Flags = append(goBuildCmd.Flags, generate_flag, install_flags, output_flags, dist_flags, wingui_flags)
 }
 
 func goBuildAction(ctx *cli.Context) error {
@@ -61,10 +64,11 @@ func goBuildAction(ctx *cli.Context) error {
 		goGenCmd   *exec.Cmd
 		goBuildCmd *exec.Cmd
 
-		generate = ctx.Bool("generate")
-		install  = ctx.Bool("install")
-		dist     = ctx.String("dist")
-		output   = ctx.String("output")
+		generate   = ctx.Bool("generate")
+		install    = ctx.Bool("install")
+		dist       = ctx.String("dist")
+		output     = ctx.String("output")
+		windowsgui = ctx.Bool("windowsgui")
 
 		target_os   = runtime.GOOS
 		target_arch = runtime.GOARCH
@@ -89,7 +93,13 @@ func goBuildAction(ctx *cli.Context) error {
 		goBuildCmd.Env = append(goBuildCmd.Env, fmt.Sprintf("GOARCH=%s", target_arch))
 	}
 
-	goBuildCmd.Args = append(goBuildCmd.Args, "-ldflags", fmt.Sprintf("-X main.buildVersion=%s", build_version()))
+	ldflags := make([]string, 0, 2)
+	ldflags = append(ldflags, fmt.Sprintf("-X main.buildVersion=%s", build_version()))
+	if windowsgui {
+		ldflags = append(ldflags, "-H=windowsgui")
+	}
+
+	goBuildCmd.Args = append(goBuildCmd.Args, "-ldflags", strings.Join(ldflags, " "))
 
 	if !install {
 		if len(output) <= 0 {
@@ -132,7 +142,9 @@ func goBuildAction(ctx *cli.Context) error {
 
 	fmt.Println(goBuildCmd)
 
-	if _, err := goBuildCmd.CombinedOutput(); err != nil {
+	if result, err := goBuildCmd.CombinedOutput(); err != nil {
+		fmt.Println("go-build-error:")
+		fmt.Println(string(result))
 		return err
 	}
 	return nil
