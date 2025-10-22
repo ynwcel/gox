@@ -135,7 +135,9 @@ func goBuildAction(ctx *cli.Context) error {
 		goGenCmd.Env = goBuildCmd.Env[:]
 		fmt.Println(goGenCmd)
 
-		if _, err := goGenCmd.CombinedOutput(); err != nil {
+		if result, err := goGenCmd.CombinedOutput(); err != nil {
+			fmt.Println("go-generate-error:")
+			fmt.Println(string(result))
 			return err
 		}
 	}
@@ -164,6 +166,8 @@ func build_version() string {
 	)
 	if v, err := exec.Command("git", "rev-parse", "--short", "HEAD").Output(); err == nil {
 		git_commit = strings.TrimSpace(string(v))
+	} else {
+		git_commit = "unknow"
 	}
 	return fmt.Sprintf("%s.%s@%s", cur_date, cur_time, git_commit)
 }
