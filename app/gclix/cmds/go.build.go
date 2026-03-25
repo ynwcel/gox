@@ -47,6 +47,11 @@ func init() {
 			Name:    "dist",
 			Aliases: []string{"d"},
 		}
+		remote_flags = &cli.StringFlag{
+			Name:    "remote",
+			Aliases: []string{"r"},
+			Usage:   "install remote package [must set -i/--install flag]",
+		}
 		wingui_flags = &cli.BoolFlag{
 			Name: "windowsgui",
 		}
@@ -54,7 +59,7 @@ func init() {
 
 	dist_flags.DefaultText = fmt.Sprintf("%s/%s [use `go tool dist list` list all]", runtime.GOOS, runtime.GOARCH)
 	dist_flags.Value = fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
-	goBuildCmd.Flags = append(goBuildCmd.Flags, generate_flag, install_flags, output_flags, dist_flags, wingui_flags)
+	goBuildCmd.Flags = append(goBuildCmd.Flags, generate_flag, install_flags, output_flags, dist_flags, remote_flags, wingui_flags)
 }
 
 func goBuildAction(ctx *cli.Context) error {
@@ -66,14 +71,21 @@ func goBuildAction(ctx *cli.Context) error {
 		install    = ctx.Bool("install")
 		dist       = ctx.String("dist")
 		output     = ctx.String("output")
+		remote     = ctx.String("remote")
 		windowsgui = ctx.Bool("windowsgui")
 
-		target_os   = runtime.GOOS
-		target_arch = runtime.GOARCH
+		target_os         = runtime.GOOS
+		target_arch       = runtime.GOARCH
+		is_remote_package = len(remote) > 0
 	)
 	if install && len(output) > 0 {
 		return fmt.Errorf("`go install` command not support `--output` flag")
-	} else if install {
+	}
+	if is_remote_package && !install {
+		return fmt.Errorf("remote package must set `--install/-i` flag")
+	}
+
+	if install {
 		goBuildCmd = exec.Command("go", "install")
 	} else {
 		goBuildCmd = exec.Command("go", "build")
@@ -92,7 +104,7 @@ func goBuildAction(ctx *cli.Context) error {
 	}
 
 	ldflags := make([]string, 0, 2)
-	ldflags = append(ldflags, fmt.Sprintf("-X main.buildVersion=%s", build_version()))
+	ldflags = append(ldflags, fmt.Sprintf("-X main.buildVersion=%s", build_version(is_remote_package)))
 	if windowsgui {
 		ldflags = append(ldflags, "-H=windowsgui")
 	}
@@ -128,7 +140,7 @@ func goBuildAction(ctx *cli.Context) error {
 		goBuildCmd.Args = append(goBuildCmd.Args, "-o", output)
 	}
 
-	if generate {
+	if !is_remote_package && generate {
 		goGenCmd = exec.Command("go", "generate", "./...")
 		goGenCmd.Env = goBuildCmd.Env[:]
 		fmt.Println(goGenCmd)
@@ -138,6 +150,10 @@ func goBuildAction(ctx *cli.Context) error {
 			fmt.Println(string(result))
 			return err
 		}
+	}
+
+	if len(remote) > 0 {
+		goBuildCmd.Args = append(goBuildCmd.Args, remote)
 	}
 
 	fmt.Println(goBuildCmd)
@@ -166,14 +182,14 @@ func build_name(os, arch string) string {
 	return name
 }
 
-func build_version() string {
+func build_version(is_remote_package bool) string {
 	var (
-		git_commit string
-	)
-	if v, err := exec.Command("git", "rev-parse", "--short", "HEAD").Output(); err == nil {
-		git_commit = strings.TrimSpace(string(v))
-	} else {
 		git_commit = "unknow"
+	)
+	if !is_remote_package {
+		if v, err := exec.Command("git", "rev-parse", "--short", "HEAD").Output(); err == nil {
+			git_commit = strings.TrimSpace(string(v))
+		}
 	}
 	return fmt.Sprintf("%s.%s@%s", cur_date, cur_time, git_commit)
 }
