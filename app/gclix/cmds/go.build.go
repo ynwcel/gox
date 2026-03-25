@@ -39,8 +39,9 @@ func init() {
 			Aliases: []string{"i"},
 		}
 		output_flags = &cli.StringFlag{
-			Name:    "output",
-			Aliases: []string{"o"},
+			Name:        "output",
+			Aliases:     []string{"o"},
+			DefaultText: build_name(runtime.GOOS, runtime.GOARCH),
 		}
 		dist_flags = &cli.StringFlag{
 			Name:    "dist",
@@ -50,9 +51,6 @@ func init() {
 			Name: "windowsgui",
 		}
 	)
-	if pkg.FileExists(GOMOD_FILE) {
-		output_flags.DefaultText = build_name(runtime.GOOS, runtime.GOARCH)
-	}
 
 	dist_flags.DefaultText = fmt.Sprintf("%s/%s [use `go tool dist list` list all]", runtime.GOOS, runtime.GOARCH)
 	dist_flags.Value = fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH)
@@ -153,7 +151,15 @@ func goBuildAction(ctx *cli.Context) error {
 }
 
 func build_name(os, arch string) string {
-	name := fmt.Sprintf("%s.%s.%s.%s.%s", filepath.Base(pkg.MustGetGoMod()), os, arch, cur_date, cur_time)
+	var mod_name = ""
+	if go_mod_name, err := pkg.GetGoModName(); err == nil {
+		mod_name = go_mod_name
+	} else if abs_path, err := filepath.Abs("."); err == nil {
+		mod_name = filepath.Base(abs_path)
+	} else {
+		mod_name = "main"
+	}
+	name := fmt.Sprintf("%s.%s.%s.%s.%s", mod_name, os, arch, cur_date, cur_time)
 	if strings.EqualFold(os, OS_WINDOWS) {
 		name = fmt.Sprintf("%s.exe", name)
 	}

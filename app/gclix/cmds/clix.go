@@ -26,8 +26,11 @@ var (
 )
 
 func init() {
+	if gofiles, err := pkg.ListFile(".", `\.go$`); err == nil && len(gofiles) > 0 {
+		clixApp.Commands = append(clixApp.Commands, goBuildCmd)
+	}
 	if pkg.FileExists(GOMOD_FILE) {
-		clixApp.Commands = append(clixApp.Commands, goBuildCmd, goRenameGoModCmd)
+		clixApp.Commands = append(clixApp.Commands, goRenameGoModCmd)
 	}
 
 	clixApp.Commands = append(clixApp.Commands, gormGenCmd)
