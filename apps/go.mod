@@ -1,8 +1,8 @@
-module github.com/ynwcel/gox/apps/gclix
+module github.com/ynwcel/gox/apps
 
 go 1.25.0
 
-replace github.com/ynwcel/gox => ../../
+replace github.com/ynwcel/gox => ../
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.15
