@@ -1,6 +1,6 @@
 module github.com/ynwcel/gox/apps
 
-go 1.27.0
+go 1.25.0
 
 replace github.com/ynwcel/gox => ../
 
