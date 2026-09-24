@@ -4,6 +4,7 @@ import (
 	"bytes"
 	phtmltpl "html/template"
 	"io"
+	"io/fs"
 	"maps"
 	"os"
 	ptexttpl "text/template"
@@ -16,24 +17,24 @@ type Viewer interface {
 }
 
 type localView struct {
-	isHtml  bool
-	tplpath string
-	datas   map[string]any
+	isHtml bool
+	viewFS fs.FS
+	datas  map[string]any
 }
 
 func NewHtmlView(tplpath string) Viewer {
 	return &localView{
-		isHtml:  true,
-		tplpath: tplpath,
-		datas:   make(map[string]any),
+		isHtml: true,
+		viewFS: os.DirFS(tplpath),
+		datas:  make(map[string]any),
 	}
 }
 
 func NewTextView(tplpath string) Viewer {
 	return &localView{
-		isHtml:  false,
-		tplpath: tplpath,
-		datas:   make(map[string]any),
+		isHtml: false,
+		viewFS: os.DirFS(tplpath),
+		datas:  make(map[string]any),
 	}
 }
 
@@ -69,7 +70,7 @@ func (lv *localView) renderHtml(w io.Writer, tpl string, data map[string]any) (i
 		html_tpl = phtmltpl.New("html").Funcs(lv.build_func_map())
 		err      error
 	)
-	if html_tpl, err = html_tpl.ParseFS(os.DirFS(lv.tplpath), "*"); err != nil {
+	if html_tpl, err = html_tpl.ParseFS(lv.viewFS, "*"); err != nil {
 		return 0, err
 	}
 	if err = html_tpl.ExecuteTemplate(output, tpl, data); err != nil {
@@ -83,7 +84,7 @@ func (lv *localView) renderText(w io.Writer, tpl string, data map[string]any) (i
 		html_tpl = ptexttpl.New("text").Funcs(lv.build_func_map())
 		err      error
 	)
-	if html_tpl, err = html_tpl.ParseFS(os.DirFS(lv.tplpath), "*"); err != nil {
+	if html_tpl, err = html_tpl.ParseFS(lv.viewFS, "*"); err != nil {
 		return 0, err
 	}
 	if err = html_tpl.ExecuteTemplate(output, tpl, data); err != nil {
