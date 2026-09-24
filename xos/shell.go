@@ -7,11 +7,10 @@ import (
 )
 
 func Shell(ctx context.Context, cmd string, args ...string) ([]byte, error) {
-	shellCmd := exec.Cmd{
-		Env:  os.Environ(),
-		Dir:  ".",
-		Path: cmd,
-		Args: args,
-	}
+
+	shellCmd := exec.CommandContext(ctx, cmd, args...)
+	shellCmd.Dir = "."
+	shellCmd.Env = os.Environ()
+
 	return shellCmd.CombinedOutput()
 }
