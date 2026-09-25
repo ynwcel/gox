@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/fs"
 	"maps"
-	"os"
 	ptexttpl "text/template"
 )
 
@@ -22,18 +21,18 @@ type localView struct {
 	datas  map[string]any
 }
 
-func NewHtmlView(tplpath string) Viewer {
+func NewHtmlView(viewfs fs.FS) Viewer {
 	return &localView{
 		isHtml: true,
-		viewFS: os.DirFS(tplpath),
+		viewFS: viewfs,
 		datas:  make(map[string]any),
 	}
 }
 
-func NewTextView(tplpath string) Viewer {
+func NewTextView(viewfs fs.FS) Viewer {
 	return &localView{
 		isHtml: false,
-		viewFS: os.DirFS(tplpath),
+		viewFS: viewfs,
 		datas:  make(map[string]any),
 	}
 }
