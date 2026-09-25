@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,9 +9,9 @@ import (
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/gogf/gf/v2/os/gview"
 	"github.com/urfave/cli/v2"
 	"github.com/ynwcel/gox/xos"
+	"github.com/ynwcel/gox/xview"
 )
 
 var (
@@ -57,8 +58,7 @@ func htmlBuildAction(ctx *cli.Context) error {
 			panic(fmt.Errorf("list files error:%w", err))
 		}
 	}
-	view := gview.New()
-	view.SetPath("./")
+	view := xview.NewHtmlView(os.DirFS("."))
 	for _, file := range files {
 		target := filepath.Clean(filepath.Join(output_dir, file))
 		if xos.PathIsDir(file) {
@@ -72,9 +72,9 @@ func htmlBuildAction(ctx *cli.Context) error {
 			panic(fmt.Errorf("get file<%s> mimie type error:%w", file, err))
 		}
 		if strings.ToLower(file_mimetype.Extension()) == ".html" || strings.ToLower(file_mimetype.Extension()) == ".htm" {
-			if content, err := view.Parse(ctx.Context, file); err != nil {
+			if content, err := view.Render(file); err != nil {
 				panic(fmt.Errorf("parse html file<%s>:%w", file, err))
-			} else if _, err := xos.PutContent(target, strings.NewReader(content)); err != nil {
+			} else if _, err := xos.PutContent(target, bytes.NewReader(content)); err != nil {
 				panic(fmt.Errorf("parse html file<%s>:%w", file, err))
 			}
 		} else {

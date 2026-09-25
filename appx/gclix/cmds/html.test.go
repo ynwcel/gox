@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/gogf/gf/v2/os/gview"
 	"github.com/urfave/cli/v2"
 	"github.com/ynwcel/gox/xos"
+	"github.com/ynwcel/gox/xview"
 )
 
 var (
@@ -54,8 +55,7 @@ func new_htmlTesthandler() *htmlTesthandler {
 	return &htmlTesthandler{
 		viewpool: &sync.Pool{
 			New: func() any {
-				view := gview.New()
-				view.SetPath("./")
+				view := xview.NewHtmlView(os.DirFS("."))
 				return view
 			},
 		},
@@ -66,7 +66,7 @@ func (self *htmlTesthandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var (
 		request_uri      = r.RequestURI
 		request_filename = fmt.Sprintf("./%s", strings.TrimLeft(request_uri, "/"))
-		view             = self.viewpool.Get().(*gview.View)
+		view             = self.viewpool.Get().(xview.Viewer)
 	)
 	log.Printf("uri=%s,file=%s\n", request_uri, request_filename)
 	if request_uri == "/" {
@@ -95,7 +95,7 @@ func (self *htmlTesthandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if strings.ToLower(file_mimetype.Extension()) == ".html" || strings.ToLower(file_mimetype.Extension()) == ".htm" {
-			if content, err := view.Parse(r.Context(), request_filename); err != nil {
+			if content, err := view.Render(request_filename); err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
 				fmt.Fprintln(w, err.Error())
 			} else {
