@@ -173,7 +173,7 @@ func goBuildAction(ctx *cli.Context) error {
 func build_name(os, arch string) string {
 	var mod_name = ""
 	if go_mod_name, err := xgomod.GetName(); err == nil {
-		mod_name = go_mod_name
+		mod_name = filepath.Base(go_mod_name)
 	} else if abs_path, err := filepath.Abs("."); err == nil {
 		mod_name = filepath.Base(abs_path)
 	} else {
