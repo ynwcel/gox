@@ -12,7 +12,8 @@ var (
 	arg_type     string
 	numDecodeCmd = &cli.Command{
 		Name:  "num-decode",
-		Usage: fmt.Sprintf("%s num-decode --type=xxx <value>", appName),
+		Usage: "num-decode",
+		UsageText: fmt.Sprintf("%s num-decode --type=xxx <value>", appName),
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "type",

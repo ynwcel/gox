@@ -10,7 +10,8 @@ import (
 
 var numEncodeCmd = &cli.Command{
 	Name:   "num-encode",
-	Usage:  fmt.Sprintf("%s num-encode <int-number>", appName),
+	Usage:"num-encode",
+	UsageText:  fmt.Sprintf("%s num-encode <int-number>", appName),
 	Action: numEncodeAction,
 }
 
