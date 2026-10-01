@@ -3,6 +3,7 @@ package cmds
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/urfave/cli/v2"
 	"github.com/ynwcel/gox/xnum"
@@ -34,6 +35,7 @@ func numDecodeAction(ctx *cli.Context) error {
 	var (
 		type_name = fmt.Sprintf("To%s", arg_type)
 		src_value = ctx.Args().Get(0)
+		convert xnum.NumConverter;
 	)
 	converts := map[string]xnum.NumConverter{
 		"To2":       xnum.NewConvertTo2(),
@@ -51,12 +53,22 @@ func numDecodeAction(ctx *cli.Context) error {
 		"To58":      xnum.NewConvertTo58(),
 		"To62":      xnum.NewConvertTo62(),
 	}
-	if convert, ok := converts[type_name]; !ok {
+	if _convert, ok := converts[type_name]; ok {
+		convert = _convert;
+	}else{
+		for k,v := range converts{
+			if strings.EqualFold(k,type_name){
+				convert = v;
+				break;
+			}
+		}
+	}
+	if convert == nil{
 		return fmt.Errorf("decode type[=%s] not found!", arg_type)
 	} else if int_64, err := convert.Decode(src_value); err != nil {
 		return err
 	} else {
-		fmt.Fprintf(os.Stdout, "Decode %s/%s  = %d", src_value, arg_type, int_64)
+		fmt.Fprintf(os.Stdout, "Decode %s/%s = %d", src_value, arg_type, int_64)
 	}
 	return nil
 }
